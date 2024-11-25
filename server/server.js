@@ -1,51 +1,57 @@
-//Config express
-const express = require("express");
-const dotenv = require("dotenv");
-const process = require("process");
-const workoutRoutes = require("./routes/workouts.js");
-const usersRoutes = require("./routes/users.js");
-const transactionsRoutes = require("./routes/Transactions.js");
-const userPortfolio = require("./routes/userPortfolio.js");
-const mongoose = require("mongoose");
-const cors = require("cors");
+// Config express
+import express from "express";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import cors from "cors";
+
+// Routes
+// import workoutRoutes from "./routes/workouts.js"; // Commented out for focused testing
+// import usersRoutes from "./routes/users.js"; // Commented out for focused testing
+// import transactionsRoutes from "./routes/Transactions.js"; // Commented out for focused testing
+// import userPortfolio from "./routes/userPortfolio.js"; // Commented out for focused testing
+import nftRoutes from "./routes/nft.js"; // NFT Metadata Retrieval
+import transactionTrackingRoutes from "./routes/transactionTracking.js"; // Transaction Tracking
 
 dotenv.config();
 
 const app = express();
 
-// configuration cors
+// Configuration cors
 const corsOptions = {
   origin: ["http://localhost:5173", "https://api.coingecko.com/"],
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
-// middleware pour parser le json
+// Middleware for parsing JSON
 app.use(express.json());
 
-// middleware pour logger les requetes
+// Middleware for logging requests
 app.use((req, res, next) => {
   console.log(req.path, req.method);
   next();
 });
 
-// routes
-app.use("/api/workouts/", workoutRoutes);
-app.use("/api/portfolio/", userPortfolio);
-app.use("/api/transactions/", transactionsRoutes);
-app.use("/api/users/", usersRoutes);
+// Routes
+// app.use("/api/workouts/", workoutRoutes); // Commented out for focused testing
+// app.use("/api/portfolio/", userPortfolio); // Commented out for focused testing
+// app.use("/api/transactions/", transactionsRoutes); // Commented out for focused testing
+// app.use("/api/users/", usersRoutes); // Commented out for focused testing
+app.use("/api/nft/", nftRoutes); // NFT Metadata Retrieval API
+app.use("/api/transaction-tracking/", transactionTrackingRoutes); // Transaction Tracking API
 
-//connect to db et lancement du server
+// Connect to DB and launch server
+console.log("Connecting to DB...");
+console.log("MONG_URI: ", process.env.MONG_URI);
 mongoose
-  .connect(process.env.MONG_URI)
+  .connect(process.env.MONG_URI, { useNewUrlParser: true, useUnifiedTopology: true }) // Ensure connection options are included
   .then(() => {
-    // listen requests
-    console.log(`connected to db`);
+    console.log(`Connected to DB`);
+    // Listen for requests
+    app.listen(process.env.PORT, () => {
+      console.log(`Listening on port ${process.env.PORT}`);
+    });
   })
   .catch((error) => {
-    // console.log(error);
+    console.error("Error connecting to database:", error.message); // Improved error logging
   });
-
-app.listen(process.env.PORT, () => {
-  console.log(`listening on port ${process.env.PORT}`);
-});
